@@ -426,7 +426,10 @@ export default function FormatCard({
             </span>
 
             {/* Judul */}
-            <h2 className="mt-3 font-syne text-2xl font-bold leading-tight text-[var(--black)] md:text-3xl lg:text-4xl">
+            <h2 
+              className="mt-3 font-syne text-2xl font-bold leading-tight text-[var(--black)] md:text-3xl lg:text-4xl line-clamp-2"
+              title={videoData.title}
+            >
               {videoData.title}
             </h2>
 
@@ -437,39 +440,43 @@ export default function FormatCard({
                   src={avatarSrc}
                   alt={videoData.nickname}
                   onError={() => setFailedAvatarSrc(avatarSrc)}
-                  className="h-12 w-12 rounded-full border-2 border-black object-cover shadow-[3px_3px_0_#000]"
+                  className="h-10 w-10 rounded-full object-cover border border-black/10"
                 />
               ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-lime text-base font-black text-[var(--black)] shadow-[3px_3px_0_#000]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lime text-base font-bold text-[var(--black)]">
                   {videoData.nickname.charAt(0).toUpperCase()}
                 </div>
               )}
               <div>
-                <p className="font-syne text-lg font-bold text-[var(--black)] leading-tight">
+                <p className="font-syne text-base font-bold text-[var(--black)] leading-tight">
                   {videoData.nickname}
                 </p>
-                <p className="text-sm font-medium text-[var(--black)]/70">
+                <p className="text-xs font-medium text-[var(--black)]/70">
                   {videoData.username}
                 </p>
               </div>
             </div>
 
             {/* Stats */}
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-medium text-[var(--black)]/70">
               {videoData.duration ? (
-                <span className="border-2 border-black bg-white px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
-                  {videoData.duration}
-                </span>
+                <span>{videoData.duration}</span>
               ) : null}
+              
+              {videoData.duration && (typeof videoData.views === "number" || typeof videoData.likes === "number") ? (
+                <span>•</span>
+              ) : null}
+              
               {typeof videoData.views === "number" ? (
-                <span className="border-2 border-black bg-[var(--bg)] px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
-                  {videoData.views.toLocaleString()} views
-                </span>
+                <span>{videoData.views.toLocaleString()} views</span>
               ) : null}
+              
+              {typeof videoData.views === "number" && typeof videoData.likes === "number" ? (
+                <span>•</span>
+              ) : null}
+              
               {typeof videoData.likes === "number" ? (
-                <span className="border-2 border-black bg-[var(--bg)] px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
-                  {videoData.likes.toLocaleString()} likes
-                </span>
+                <span>{videoData.likes.toLocaleString()} likes</span>
               ) : null}
             </div>
 
