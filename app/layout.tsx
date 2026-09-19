@@ -15,9 +15,54 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "TikSave - Download TikTok Video & MP3",
+  title: "TikSave - Download TT Video & MP3",
   description:
-    "Download TikTok videos and MP3 audio with TikSave, a fast neo-brutalist web app built with Next.js.",
+    "Free TikTok video downloader. Download TikTok videos without watermark and save MP3 audio fast, easily, and securely with TikSave.",
+  keywords: [
+    "tiktok downloader",
+    "tiktok video downloader",
+    "download tiktok mp3",
+    "tiktok no watermark",
+    "save tiktok video",
+    "tt downloader",
+    "tiktok audio download",
+    "tiksave",
+  ],
+  authors: [{ name: "TikSave" }],
+  creator: "TikSave",
+  publisher: "TikSave",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    title: "TikSave - Fast TikTok Video & Audio Downloader",
+    description:
+      "Download TikTok videos without watermark and save MP3 audio in seconds. Try TikSave now!",
+    url: "/",
+    siteName: "TikSave",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TikSave - Fast TikTok Video & Audio Downloader",
+    description:
+      "Download TikTok videos without watermark and save MP3 audio in seconds. Try TikSave now!",
+    creator: "@tiksave",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({

@@ -122,8 +122,34 @@ export default function Home() {
     setResults((prev) => prev.filter((r) => r.id !== id));
   };
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "TikSave",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://tiksave.com", // Fallback URL if env is not set
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "All",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    description:
+      "Free TikTok video downloader. Download TikTok videos without watermark and save MP3 audio fast, easily, and securely with TikSave.",
+    featureList: [
+      "Download TikTok Videos without watermark",
+      "Download TikTok Audio (MP3)",
+      "Download TikTok Photo Slideshows",
+      "Fast and secure",
+    ],
+  };
+
   return (
     <main className="flex flex-1 flex-col gap-8 pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <HeroSection
         errorMessage={formErrorMessage}
         onDownload={handleDownload}
