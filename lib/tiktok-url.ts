@@ -1,5 +1,5 @@
 const SHORT_LINK_HOSTS = new Set(["vt.tiktok.com", "vm.tiktok.com"]);
-const VIDEO_PATH_PATTERN = /^\/(@[^/]+)\/video\/(\d+)\/?$/;
+const VIDEO_PATH_PATTERN = /^\/(@[^/]+)\/(video|photo)\/(\d+)\/?$/;
 
 export class TikTokUrlError extends Error {
   constructor(
@@ -38,7 +38,8 @@ function toCanonicalVideoUrl(url: URL): string | null {
     return null;
   }
 
-  return `https://www.tiktok.com/${match[1]}/video/${match[2]}`;
+  // match[1] = @user, match[2] = "video" | "photo", match[3] = id
+  return `https://www.tiktok.com/${match[1]}/${match[2]}/${match[3]}`;
 }
 
 async function resolveShortTikTokUrl(url: URL): Promise<URL> {
@@ -97,7 +98,7 @@ export async function normalizeTikTokVideoUrl(rawUrl: string): Promise<string> {
   const canonicalVideoUrl = toCanonicalVideoUrl(resolvedUrl);
 
   if (!canonicalVideoUrl) {
-    throw new TikTokUrlError("Only TikTok video URLs are supported.");
+    throw new TikTokUrlError("Only TikTok video or photo URLs are supported.");
   }
 
   return canonicalVideoUrl;

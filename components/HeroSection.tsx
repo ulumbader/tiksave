@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 type HeroSectionProps = {
   errorMessage?: string | null;
-  onDownload: (url: string) => void | Promise<void>;
+  onDownload: (urls: string[]) => void | Promise<void>;
 };
 
 const badges = [
@@ -13,29 +13,56 @@ const badges = [
   { label: "HD Quality", className: "lg:right-0 lg:bottom-24 lg:-rotate-3" },
 ];
 
+const MAX_URLS = 5;
+
 export default function HeroSection({
   errorMessage = null,
   onDownload,
 }: HeroSectionProps) {
-  const [inputValue, setInputValue] = useState("");
-  const hasInputValue = inputValue.trim().length > 0;
+  const [urls, setUrls] = useState<string[]>([""]);
 
-  const handleInputAction = async () => {
-    if (hasInputValue) {
-      setInputValue("");
-      return;
-    }
+  const validCount = urls.filter((u) => u.trim().length > 0).length;
 
-    try {
-      const pastedValue = await navigator.clipboard.readText();
-      setInputValue(pastedValue);
-    } catch {
-      // Ignore clipboard errors and leave manual paste available.
-    }
+  const updateUrl = (index: number, value: string) => {
+    setUrls((prev) => prev.map((u, i) => (i === index ? value : u)));
   };
 
+  const addUrl = useCallback(() => {
+    if (urls.length < MAX_URLS) {
+      setUrls((prev) => [...prev, ""]);
+    }
+  }, [urls.length]);
+
+  const removeUrl = useCallback(
+    (index: number) => {
+      if (urls.length > 1) {
+        setUrls((prev) => prev.filter((_, i) => i !== index));
+      }
+    },
+    [urls.length]
+  );
+
+  const handlePasteOrClear = useCallback(
+    async (index: number) => {
+      if (urls[index].trim()) {
+        updateUrl(index, "");
+        return;
+      }
+      try {
+        const text = await navigator.clipboard.readText();
+        updateUrl(index, text);
+      } catch {
+        // Ignore clipboard errors — user can still type manually.
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [urls]
+  );
+
   const handleDownload = () => {
-    void onDownload(inputValue.trim());
+    const trimmed = urls.map((u) => u.trim()).filter(Boolean);
+    if (trimmed.length === 0) return;
+    void onDownload(trimmed);
   };
 
   return (
@@ -53,10 +80,7 @@ export default function HeroSection({
             <a href="#home" className="transition-transform hover:-translate-y-0.5">
               Home
             </a>
-            <a
-              href="#how-it-works"
-              className="transition-transform hover:-translate-y-0.5"
-            >
+            <a href="#how-it-works" className="transition-transform hover:-translate-y-0.5">
               How It Works
             </a>
             <a href="#faq" className="transition-transform hover:-translate-y-0.5">
@@ -77,6 +101,7 @@ export default function HeroSection({
 
       <div className="relative flex flex-1 items-center justify-center py-14 md:py-20">
         <div className="relative flex w-full max-w-6xl flex-col items-center text-center">
+          {/* Floating badges */}
           <div className="mb-6 flex flex-wrap justify-center gap-3 lg:mb-0">
             {badges.map((badge) => (
               <span
@@ -89,51 +114,116 @@ export default function HeroSection({
           </div>
 
           <h1 className="max-w-5xl font-syne text-5xl font-black leading-[0.92] tracking-[-0.04em] text-[var(--black)] sm:text-6xl md:text-7xl lg:text-[5.5rem]">
-            Download TikTok Videos & <span className="bg-lime px-1">MP3</span>{" "}
-            Instantly
+            Download TikTok Videos &{" "}
+            <span className="bg-lime px-1">MP3</span> Instantly
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg leading-8 text-[var(--black)] md:text-xl">
             Free, fast, no watermark. Paste any TikTok link below.
           </p>
 
-          <div
-            id="download-form"
-            className="mt-10 w-full max-w-4xl border-2 border-black bg-white p-2 shadow-[6px_6px_0_#000]"
-          >
-            <div className="relative">
-              <input
-                type="url"
-                value={inputValue}
-                onChange={(event) => setInputValue(event.target.value)}
-                placeholder="Paste TikTok URL here..."
-                className="h-16 w-full bg-transparent px-4 pr-28 text-base font-medium text-[var(--black)] outline-none placeholder:text-black/45 md:text-lg"
-              />
-              <button
-                type="button"
-                onClick={handleInputAction}
-                className="absolute right-2 top-2 bottom-2 border-2 border-black bg-pink px-4 text-sm font-black uppercase tracking-[0.14em] text-white shadow-[4px_4px_0_#000] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-              >
-                {hasInputValue ? "Clear" : "Paste"}
-              </button>
-            </div>
+          {/* ── URL Input Rows ─────────────────────────────────────── */}
+          <div id="download-form" className="mt-10 w-full max-w-4xl space-y-3">
+            {urls.map((url, index) => {
+              const hasValue = url.trim().length > 0;
+              const isFirst = index === 0;
+              const canRemove = urls.length > 1;
+              const canAdd = urls.length < MAX_URLS;
+
+              return (
+                <div
+                  key={index}
+                  className="flex items-center gap-0 border-2 border-black bg-white shadow-[4px_4px_0_#000]"
+                >
+                  {/* Row number badge (só aparece quando > 1 URL) */}
+                  {urls.length > 1 && (
+                    <div className="flex h-full items-center border-r-2 border-black bg-[var(--bg)] px-3 py-4 text-xs font-black text-[var(--black)]">
+                      {index + 1}
+                    </div>
+                  )}
+
+                  {/* Input field */}
+                  <input
+                    type="url"
+                    value={url}
+                    onChange={(e) => updateUrl(index, e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleDownload();
+                    }}
+                    placeholder={
+                      isFirst
+                        ? "Paste TikTok URL here..."
+                        : `TikTok URL ${index + 1}...`
+                    }
+                    className="h-16 min-w-0 flex-1 bg-transparent px-4 text-base font-medium text-[var(--black)] outline-none placeholder:text-black/40 md:text-lg"
+                  />
+
+                  {/* [−] Remove button — hanya tampil jika bisa remove */}
+                  {canRemove && (
+                    <button
+                      type="button"
+                      onClick={() => removeUrl(index)}
+                      aria-label={`Hapus URL ${index + 1}`}
+                      className="flex h-full items-center border-l-2 border-black px-3 py-4 text-sm font-black text-[var(--black)] transition-colors hover:bg-black/5"
+                      title="Hapus field ini"
+                    >
+                      −
+                    </button>
+                  )}
+
+                  {/* [+] Add new URL — sebelum Paste */}
+                  <button
+                    type="button"
+                    onClick={addUrl}
+                    disabled={!canAdd}
+                    aria-label="Tambah URL baru"
+                    className="flex h-full items-center border-l-2 border-black px-3 py-4 text-sm font-black text-[var(--black)] transition-colors hover:bg-lime/60 disabled:cursor-not-allowed disabled:opacity-30"
+                    title={canAdd ? "Tambah URL baru" : `Maksimal ${MAX_URLS} URL`}
+                  >
+                    +
+                  </button>
+
+                  {/* [Paste / Clear] */}
+                  <button
+                    type="button"
+                    onClick={() => void handlePasteOrClear(index)}
+                    className="m-2 border-2 border-black bg-pink px-4 py-2 text-sm font-black uppercase tracking-[0.14em] text-white shadow-[3px_3px_0_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                  >
+                    {hasValue ? "Clear" : "Paste"}
+                  </button>
+                </div>
+              );
+            })}
           </div>
 
+          {/* Error message */}
           {errorMessage ? (
             <div className="mt-4 w-full max-w-4xl border-2 border-red-600 bg-white px-4 py-3 text-left text-sm font-bold text-red-700 shadow-[4px_4px_0_#b91c1c]">
               {errorMessage}
             </div>
           ) : null}
 
+          {/* Download button */}
           <div className="mt-6 flex w-full max-w-4xl">
             <button
               type="button"
               onClick={handleDownload}
-              className="btn-brutal w-full bg-lime px-6 py-4 text-lg font-black text-[var(--black)]"
+              disabled={validCount === 0}
+              className="btn-brutal w-full bg-lime px-6 py-4 text-lg font-black text-[var(--black)] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {"\u2B07"} Download
+              {"⬇"}{" "}
+              {validCount > 1
+                ? `Download ${validCount} URL`
+                : "Download"}
             </button>
           </div>
+
+          {/* Hint max URLs */}
+          {urls.length >= MAX_URLS && (
+            <p className="mt-2 text-xs font-medium text-[var(--black)]/50">
+              Maksimal {MAX_URLS} URL sekaligus
+            </p>
+          )}
         </div>
       </div>
     </section>

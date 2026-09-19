@@ -118,11 +118,11 @@ function buildHeaders(): HeadersInit {
  * Contoh: https://www.tiktok.com/@user/video/7123456789012345678 → "7123456789012345678"
  */
 export function extractTikTokDetailId(normalizedUrl: string): string {
-  const match = normalizedUrl.match(/\/video\/(\d+)/);
+  const match = normalizedUrl.match(/\/(?:video|photo)\/(\d+)/);
 
   if (!match) {
     throw new TikTokDownloaderError(
-      "Tidak dapat mengekstrak video ID dari URL TikTok. Pastikan URL berformat: tiktok.com/@user/video/ID",
+      "Tidak dapat mengekstrak ID dari URL TikTok. Pastikan URL berformat: tiktok.com/@user/video/ID atau tiktok.com/@user/photo/ID",
       400
     );
   }

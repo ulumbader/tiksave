@@ -10,4 +10,8 @@ export interface VideoData {
   downloadMp3: string;
   views?: number;
   likes?: number;
+  /** "video" untuk post video, "image" untuk post foto/carousel */
+  type?: "video" | "image";
+  /** Array URL foto (hanya ada jika type === "image") */
+  images?: string[];
 }
