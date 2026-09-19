@@ -1,65 +1,137 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+import ErrorPopup from "@/components/ErrorPopup";
+import Footer from "@/components/Footer";
+import FormatCard, { type DownloadFormat } from "@/components/FormatCard";
+import FAQSection from "@/components/FAQSection";
+import HeroSection from "@/components/HeroSection";
+import HowItWorks from "@/components/HowItWorks";
+import type { VideoData } from "@/types/video";
+
+type DownloadApiResponse =
+  | {
+      success: true;
+      data: VideoData;
+    }
+  | {
+      success: false;
+      error: string;
+    };
 
 export default function Home() {
+  const [formErrorMessage, setFormErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [popupErrorMessage, setPopupErrorMessage] = useState<string | null>(null);
+  const [showCard, setShowCard] = useState(false);
+  const [videoData, setVideoData] = useState<VideoData | null>(null);
+  const [selectedFormat, setSelectedFormat] = useState<DownloadFormat>("video");
+  const resultSectionRef = useRef<HTMLElement | null>(null);
+  const formatCardKey = loading
+    ? "loading-card"
+    : `${videoData?.downloadUrl ?? "empty"}:${videoData?.thumbnail ?? "no-thumbnail"}:${videoData?.avatar ?? "no-avatar"}`;
+
+  useEffect(() => {
+    if (!showCard || !loading) {
+      return;
+    }
+
+    const animationFrameId = window.requestAnimationFrame(() => {
+      resultSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(animationFrameId);
+  }, [loading, showCard]);
+
+  const handleDownload = async (url: string) => {
+    const trimmedUrl = url.trim();
+
+    if (!trimmedUrl) {
+      setPopupErrorMessage(null);
+      setFormErrorMessage("Please paste a TikTok URL first.");
+      return;
+    }
+
+    setFormErrorMessage(null);
+    setPopupErrorMessage(null);
+    setLoading(true);
+    setShowCard(true);
+    setVideoData(null);
+
+    try {
+      const response = await fetch("/api/download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: trimmedUrl,
+          format: "video",
+        }),
+      });
+
+      const payload = (await response.json()) as DownloadApiResponse;
+
+      if (!response.ok || !payload.success) {
+        throw new Error(
+          payload.success ? `Download lookup failed: ${response.status}` : payload.error
+        );
+      }
+
+      setVideoData(payload.data);
+      setShowCard(true);
+    } catch (error) {
+      setShowCard(false);
+      setPopupErrorMessage(
+        error instanceof Error ? error.message : "Failed to fetch video info"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFormatChange = (format: "video" | "mp3") => {
+    setSelectedFormat(format);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="flex flex-1 flex-col gap-8 pb-16">
+      <HeroSection
+        errorMessage={formErrorMessage}
+        onDownload={handleDownload}
+      />
+
+      {showCard ? (
+        <section ref={resultSectionRef} className="mx-auto w-full max-w-6xl">
+          <FormatCard
+            key={formatCardKey}
+            loading={loading}
+            videoData={videoData}
+            format={selectedFormat}
+            onFormatChange={handleFormatChange}
+            onClose={() => {
+              setLoading(false);
+              setShowCard(false);
+              setVideoData(null);
+            }}
+          />
+        </section>
+      ) : null}
+
+      <HowItWorks />
+      <FAQSection />
+      <Footer />
+
+      {popupErrorMessage ? (
+        <ErrorPopup
+          message={popupErrorMessage}
+          onClose={() => setPopupErrorMessage(null)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      ) : null}
+    </main>
   );
 }
