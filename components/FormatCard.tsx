@@ -130,15 +130,15 @@ export default function FormatCard({
   const accentClass = isPhotoPost
     ? "bg-pink text-white"
     : format === "video"
-    ? "bg-lime text-[var(--black)]"
-    : "bg-pink text-white";
+      ? "bg-lime text-[var(--black)]"
+      : "bg-pink text-white";
 
   // Download MP4: pakai downloadUrl langsung (sudah tersedia dari preview) — tidak perlu fetch ulang API
   const primaryHref = videoData?.downloadUrl
     ? `/api/video?url=${encodeURIComponent(videoData.downloadUrl)}&download=1`
     : videoData?.sourceUrl
-    ? `/api/video?sourceUrl=${encodeURIComponent(videoData.sourceUrl)}&download=1`
-    : undefined;
+      ? `/api/video?sourceUrl=${encodeURIComponent(videoData.sourceUrl)}&download=1`
+      : undefined;
 
   // Preview: pakai downloadUrl langsung
   const previewVideoSrc = videoData?.downloadUrl
@@ -149,8 +149,8 @@ export default function FormatCard({
   const conversionVideoSrc = videoData?.downloadUrl
     ? `/api/video?url=${encodeURIComponent(videoData.downloadUrl)}`
     : videoData?.sourceUrl
-    ? `/api/video?sourceUrl=${encodeURIComponent(videoData.sourceUrl)}`
-    : undefined;
+      ? `/api/video?sourceUrl=${encodeURIComponent(videoData.sourceUrl)}`
+      : undefined;
   const thumbnailSrc = videoData?.thumbnail
     ? `/api/image?url=${encodeURIComponent(videoData.thumbnail)}`
     : null;
@@ -364,246 +364,241 @@ export default function FormatCard({
         }}
       >
 
-      {/* ── LAYOUT GRID: Mobile=stacked | Desktop=side-by-side ─── */}
-      <div className="grid gap-0 lg:gap-8 lg:grid-cols-[320px_1fr] lg:p-6">
+        {/* ── LAYOUT GRID: Mobile=stacked | Desktop=side-by-side ─── */}
+        <div className="grid gap-0 lg:gap-8 lg:grid-cols-[320px_1fr] lg:p-6">
 
-        {/* ── Kolom kiri / atas: preview ────────────────────────── */}
-        <div className="relative">
-          {isPhotoPost && images.length > 0 ? (
-            // MODE FOTO: carousel
-            <div className="p-4 lg:p-0">
-              <PhotoCarousel images={images} title={videoData.title} />
-            </div>
-          ) : (
-            // MODE VIDEO: satu elemen untuk mobile & desktop — wrapper responsif
-            <div className="
+          {/* ── Kolom kiri / atas: preview ────────────────────────── */}
+          <div className="relative">
+            {isPhotoPost && images.length > 0 ? (
+              // MODE FOTO: carousel
+              <div className="p-4 lg:p-0">
+                <PhotoCarousel images={images} title={videoData.title} />
+              </div>
+            ) : (
+              // MODE VIDEO: satu elemen untuk mobile & desktop — wrapper responsif
+              <div className="
               border-b-2 border-black bg-black
               lg:border-2 lg:bg-white lg:p-3 lg:shadow-[4px_4px_0_#000]
             ">
-              {previewVideoSrc && failedVideoSrc !== previewVideoSrc ? (
-                <video
-                  controls
-                  playsInline
-                  preload="metadata"
-                  poster={thumbnailSrc || undefined}
-                  onError={() => setFailedVideoSrc(previewVideoSrc)}
-                  className="w-full aspect-video bg-black object-contain lg:aspect-[4/5] lg:border-2 lg:border-black lg:object-cover"
-                >
-                  <source src={previewVideoSrc} />
-                  Your browser does not support the video tag.
-                </video>
-              ) : thumbnailSrc && failedThumbnailSrc !== thumbnailSrc ? (
-                <img
-                  src={thumbnailSrc}
-                  alt={videoData.title}
-                  onError={() => setFailedThumbnailSrc(thumbnailSrc)}
-                  className="w-full aspect-video object-cover lg:aspect-[4/5] lg:border-2 lg:border-black"
-                />
-              ) : (
-                <div className="flex aspect-video w-full items-center justify-center bg-[var(--bg)] px-4 text-center font-syne text-xl font-bold text-[var(--black)] lg:aspect-[4/5] lg:border-2 lg:border-black">
-                  No Preview
+                {previewVideoSrc && failedVideoSrc !== previewVideoSrc ? (
+                  <video
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster={thumbnailSrc || undefined}
+                    onError={() => setFailedVideoSrc(previewVideoSrc)}
+                    className="w-full aspect-video bg-black object-contain lg:aspect-[4/5] lg:border-2 lg:border-black lg:object-cover"
+                  >
+                    <source src={previewVideoSrc} />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : thumbnailSrc && failedThumbnailSrc !== thumbnailSrc ? (
+                  <img
+                    src={thumbnailSrc}
+                    alt={videoData.title}
+                    onError={() => setFailedThumbnailSrc(thumbnailSrc)}
+                    className="w-full aspect-video object-cover lg:aspect-[4/5] lg:border-2 lg:border-black"
+                  />
+                ) : (
+                  <div className="flex aspect-video w-full items-center justify-center bg-[var(--bg)] px-4 text-center font-syne text-xl font-bold text-[var(--black)] lg:aspect-[4/5] lg:border-2 lg:border-black">
+                    No Preview
+                  </div>
+                )}
+                {/* Label TikSave — hanya desktop */}
+                <div className="hidden lg:block mt-4 border-2 border-black bg-[var(--bg)] px-3 py-2 text-center text-xs font-black uppercase tracking-[0.14em] text-[var(--black)]">
+                  TikSave
                 </div>
-              )}
-              {/* Label TikSave — hanya desktop */}
-              <div className="hidden lg:block mt-4 border-2 border-black bg-[var(--bg)] px-3 py-2 text-center text-xs font-black uppercase tracking-[0.14em] text-[var(--black)]">
-                TikSave
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Kolom kanan / bawah: info & actions ──────────────── */}
-        <div className="p-4 lg:p-0 lg:pt-3">
-          {/* Badge status */}
-          <span
-            className={`inline-flex border-2 border-black px-4 py-1.5 text-xs font-black uppercase tracking-[0.14em] shadow-[3px_3px_0_#000] ${accentClass}`}
-          >
-            {isPhotoPost
-              ? `📷 Photo (${images.length} foto)`
-              : format === "video"
-              ? "Video Ready"
-              : "MP3 Ready"}
-          </span>
-
-          {/* Judul */}
-          <h2 className="mt-3 font-syne text-2xl font-bold leading-tight text-[var(--black)] md:text-3xl lg:text-4xl">
-            {videoData.title}
-          </h2>
-
-          {/* Creator */}
-          <div className="mt-4 flex items-center gap-3">
-            {avatarSrc && failedAvatarSrc !== avatarSrc ? (
-              <img
-                src={avatarSrc}
-                alt={videoData.nickname}
-                onError={() => setFailedAvatarSrc(avatarSrc)}
-                className="h-12 w-12 rounded-full border-2 border-black object-cover shadow-[3px_3px_0_#000]"
-              />
-            ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-lime text-base font-black text-[var(--black)] shadow-[3px_3px_0_#000]">
-                {videoData.nickname.charAt(0).toUpperCase()}
               </div>
             )}
-            <div>
-              <p className="font-syne text-lg font-bold text-[var(--black)] leading-tight">
-                {videoData.nickname}
-              </p>
-              <p className="text-sm font-medium text-[var(--black)]/70">
-                {videoData.username}
-              </p>
+          </div>
+
+          {/* ── Kolom kanan / bawah: info & actions ──────────────── */}
+          <div className="p-4 lg:p-0 lg:pt-3">
+            {/* Badge status */}
+            <span
+              className={`inline-flex border-2 border-black px-4 py-1.5 text-xs font-black uppercase tracking-[0.14em] shadow-[3px_3px_0_#000] ${accentClass}`}
+            >
+              {isPhotoPost
+                ? `📷 Photo (${images.length} foto)`
+                : format === "video"
+                  ? "Video Ready"
+                  : "MP3 Ready"}
+            </span>
+
+            {/* Judul */}
+            <h2 className="mt-3 font-syne text-2xl font-bold leading-tight text-[var(--black)] md:text-3xl lg:text-4xl">
+              {videoData.title}
+            </h2>
+
+            {/* Creator */}
+            <div className="mt-4 flex items-center gap-3">
+              {avatarSrc && failedAvatarSrc !== avatarSrc ? (
+                <img
+                  src={avatarSrc}
+                  alt={videoData.nickname}
+                  onError={() => setFailedAvatarSrc(avatarSrc)}
+                  className="h-12 w-12 rounded-full border-2 border-black object-cover shadow-[3px_3px_0_#000]"
+                />
+              ) : (
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-lime text-base font-black text-[var(--black)] shadow-[3px_3px_0_#000]">
+                  {videoData.nickname.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div>
+                <p className="font-syne text-lg font-bold text-[var(--black)] leading-tight">
+                  {videoData.nickname}
+                </p>
+                <p className="text-sm font-medium text-[var(--black)]/70">
+                  {videoData.username}
+                </p>
+              </div>
             </div>
-          </div>
 
-          {/* Stats */}
-          <div className="mt-3 flex flex-wrap gap-2">
-            {videoData.duration ? (
-              <span className="border-2 border-black bg-white px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
-                {videoData.duration}
-              </span>
-            ) : null}
-            {typeof videoData.views === "number" ? (
-              <span className="border-2 border-black bg-[var(--bg)] px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
-                {videoData.views.toLocaleString()} views
-              </span>
-            ) : null}
-            {typeof videoData.likes === "number" ? (
-              <span className="border-2 border-black bg-[var(--bg)] px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
-                {videoData.likes.toLocaleString()} likes
-              </span>
-            ) : null}
-          </div>
+            {/* Stats */}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {videoData.duration ? (
+                <span className="border-2 border-black bg-white px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
+                  {videoData.duration}
+                </span>
+              ) : null}
+              {typeof videoData.views === "number" ? (
+                <span className="border-2 border-black bg-[var(--bg)] px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
+                  {videoData.views.toLocaleString()} views
+                </span>
+              ) : null}
+              {typeof videoData.likes === "number" ? (
+                <span className="border-2 border-black bg-[var(--bg)] px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
+                  {videoData.likes.toLocaleString()} likes
+                </span>
+              ) : null}
+            </div>
 
-          {/* ── Foto mode: Choose Photo ─────────────────────────────── */}
-          {isPhotoPost ? (
-            <>
-              <div className="mt-6">
-                <p className="text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
-                  Choose Photo
-                  <span className="ml-2 font-medium normal-case text-[var(--black)]/60">
-                    (pilih foto yang ingin didownload)
-                  </span>
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {images.map((_, idx) => {
-                    const isSelected = selectedPhotos.has(idx);
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => togglePhotoSelection(idx)}
-                        aria-label={`Pilih foto ${idx + 1}`}
-                        className={`h-11 w-11 border-2 border-black text-sm font-black shadow-[3px_3px_0_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
-                          isSelected
-                            ? "bg-pink text-white"
-                            : "bg-[var(--bg)] text-[var(--black)]"
-                        }`}
-                      >
-                        {idx + 1}
-                      </button>
-                    );
-                  })}
+            {/* ── Foto mode: Choose Photo ─────────────────────────────── */}
+            {isPhotoPost ? (
+              <>
+                <div className="mt-6">
+                  <p className="text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
+                    Choose Photo
+                    <span className="ml-2 font-medium normal-case text-[var(--black)]/60">
+                      (pilih foto yang ingin didownload)
+                    </span>
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {images.map((_, idx) => {
+                      const isSelected = selectedPhotos.has(idx);
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => togglePhotoSelection(idx)}
+                          aria-label={`Pilih foto ${idx + 1}`}
+                          className={`h-11 w-11 border-2 border-black text-sm font-black shadow-[3px_3px_0_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${isSelected
+                              ? "bg-pink text-white"
+                              : "bg-[var(--bg)] text-[var(--black)]"
+                            }`}
+                        >
+                          {idx + 1}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="mt-2 text-xs font-medium text-[var(--black)]/50">
+                    {selectedPhotos.size} dari {images.length} foto dipilih
+                  </p>
                 </div>
-                <p className="mt-2 text-xs font-medium text-[var(--black)]/50">
-                  {selectedPhotos.size} dari {images.length} foto dipilih
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => void handleDownloadPhotos()}
-                disabled={downloadingPhotos}
-                className={`btn-brutal mt-6 flex w-full items-center justify-center gap-2 bg-pink px-6 py-4 text-lg font-black text-white ${
-                  downloadingPhotos ? "cursor-not-allowed opacity-70" : ""
-                }`}
-              >
-                {downloadingPhotos ? (
-                  <>⏳ Mengunduh foto...</>
-                ) : (
-                  <>
-                    {"⬇"} Download Photo
-                    {selectedPhotos.size > 1
-                      ? ` (${selectedPhotos.size} foto)`
-                      : ""}
-                  </>
-                )}
-              </button>
-            </>
-          ) : (
-            /* ── Video mode: Choose Quality + MP4 + MP3 ──────────── */
-            <>
-              <div className="mt-5">
-                <p className="text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
-                  Choose Quality
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {qualities.map((quality) => {
-                    const isSelected = selectedQuality === quality;
-                    return (
-                      <button
-                        key={quality}
-                        type="button"
-                        onClick={() => setSelectedQuality(quality)}
-                        className={`border-2 border-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.14em] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none ${
-                          isSelected
-                            ? "bg-lime text-[var(--black)]"
-                            : "bg-[var(--bg)] text-[var(--black)]"
-                        }`}
-                      >
-                        {quality}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Download buttons: full-width stacked on mobile */}
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
-                <a
-                  href={primaryHref}
-                  onClick={() => setFormat("video")}
-                  className={`btn-brutal flex w-full items-center justify-center gap-2 bg-lime px-6 py-4 text-center text-base font-black text-[var(--black)] sm:flex-1 ${
-                    format === "video" ? "ring-4 ring-black" : ""
-                  }`}
-                >
-                  ↓ Download MP4
-                </a>
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setFormat("mp3");
-                    handleMp3Download();
-                  }}
-                  disabled={mp3Loading}
-                  className={`btn-brutal flex w-full items-center justify-center gap-2 bg-pink px-6 py-4 text-base font-black text-white sm:flex-1 ${
-                    mp3Loading ? "cursor-not-allowed opacity-80" : ""
-                  } ${format === "mp3" ? "ring-4 ring-black" : ""}`}
+                  onClick={() => void handleDownloadPhotos()}
+                  disabled={downloadingPhotos}
+                  className={`btn-brutal mt-6 flex w-full items-center justify-center gap-2 bg-pink px-6 py-4 text-lg font-black text-white ${downloadingPhotos ? "cursor-not-allowed opacity-70" : ""
+                    }`}
                 >
-                  {mp3Loading
-                    ? `⚙️ Converting... ${progress}%`
-                    : "🎵 Download MP3"}
+                  {downloadingPhotos ? (
+                    <>⏳ Mengunduh foto...</>
+                  ) : (
+                    <>
+                      {"⬇"} Download Photo
+                      {selectedPhotos.size > 1
+                        ? ` (${selectedPhotos.size} foto)`
+                        : ""}
+                    </>
+                  )}
                 </button>
-              </div>
-
-              {mp3Loading ? (
-                <div className="mt-4">
-                  <div className="overflow-hidden border-2 border-black bg-white shadow-[4px_4px_0_#000]">
-                    <div
-                      className="h-4 bg-lime transition-[width] duration-200"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <p className="mt-2 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
-                    Converting... {progress}%
+              </>
+            ) : (
+              /* ── Video mode: Choose Quality + MP4 + MP3 ──────────── */
+              <>
+                <div className="mt-5">
+                  <p className="text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
+                    Choose Quality
                   </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {qualities.map((quality) => {
+                      const isSelected = selectedQuality === quality;
+                      return (
+                        <button
+                          key={quality}
+                          type="button"
+                          onClick={() => setSelectedQuality(quality)}
+                          className={`border-2 border-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.14em] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none ${isSelected
+                              ? "bg-lime text-[var(--black)]"
+                              : "bg-[var(--bg)] text-[var(--black)]"
+                            }`}
+                        >
+                          {quality}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              ) : null}
-            </>
-          )}
-        </div>
-      </div>
 
-      {/* ── end collapsible body ── */}
+                {/* Download buttons: full-width stacked on mobile */}
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+                  <a
+                    href={primaryHref}
+                    onClick={() => setFormat("video")}
+                    className={`btn-brutal flex w-full items-center justify-center gap-2 bg-lime px-6 py-4 text-center text-base font-black text-[var(--black)] sm:flex-1 ${format === "video" ? "ring-4 ring-black" : ""
+                      }`}
+                  >
+                    ↓ Download MP4
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormat("mp3");
+                      handleMp3Download();
+                    }}
+                    disabled={mp3Loading}
+                    className={`btn-brutal flex w-full items-center justify-center gap-2 bg-pink px-6 py-4 text-base font-black text-white sm:flex-1 ${mp3Loading ? "cursor-not-allowed opacity-80" : ""
+                      } ${format === "mp3" ? "ring-4 ring-black" : ""}`}
+                  >
+                    {mp3Loading
+                      ? `⚙️ Converting... ${progress}%`
+                      : "🎵 Download MP3"}
+                  </button>
+                </div>
+
+                {mp3Loading ? (
+                  <div className="mt-4">
+                    <div className="overflow-hidden border-2 border-black bg-white shadow-[4px_4px_0_#000]">
+                      <div
+                        className="h-4 bg-lime transition-[width] duration-200"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
+                      Converting... {progress}%
+                    </p>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* ── end collapsible body ── */}
       </div>
     </article>
   );
