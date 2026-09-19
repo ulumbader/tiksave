@@ -109,6 +109,8 @@ export default function FormatCard({
   const [failedAvatarSrc, setFailedAvatarSrc] = useState<string | null>(null);
   // format state dikelola internal — tiap card independen
   const [format, setFormat] = useState<DownloadFormat>("video");
+  // minimize state
+  const [minimized, setMinimized] = useState(false);
 
   // Photo selection state (set of selected indices, 0-based)
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(
@@ -131,13 +133,22 @@ export default function FormatCard({
     ? "bg-lime text-[var(--black)]"
     : "bg-pink text-white";
 
-  const primaryHref = videoData?.sourceUrl
+  // Download MP4: pakai downloadUrl langsung (sudah tersedia dari preview) — tidak perlu fetch ulang API
+  const primaryHref = videoData?.downloadUrl
+    ? `/api/video?url=${encodeURIComponent(videoData.downloadUrl)}&download=1`
+    : videoData?.sourceUrl
     ? `/api/video?sourceUrl=${encodeURIComponent(videoData.sourceUrl)}&download=1`
     : undefined;
+
+  // Preview: pakai downloadUrl langsung
   const previewVideoSrc = videoData?.downloadUrl
     ? `/api/video?url=${encodeURIComponent(videoData.downloadUrl)}`
     : null;
-  const conversionVideoSrc = videoData?.sourceUrl
+
+  // MP3 conversion: pakai downloadUrl jika ada, fallback ke sourceUrl
+  const conversionVideoSrc = videoData?.downloadUrl
+    ? `/api/video?url=${encodeURIComponent(videoData.downloadUrl)}`
+    : videoData?.sourceUrl
     ? `/api/video?sourceUrl=${encodeURIComponent(videoData.sourceUrl)}`
     : undefined;
   const thumbnailSrc = videoData?.thumbnail
@@ -192,46 +203,66 @@ export default function FormatCard({
   // ── Loading skeleton ──────────────────────────────────────────────────────
   if (loading) {
     return (
-      <article className="relative border-2 border-black bg-white p-5 shadow-[6px_6px_0_#000] md:p-6">
+      <article className="relative border-2 border-black bg-white shadow-[6px_6px_0_#000] overflow-hidden">
+        {/* Mobile header bar */}
+        <div className="flex items-center justify-between border-b-2 border-black px-4 py-3 lg:hidden animate-pulse">
+          <div className="h-10 w-10 border-2 border-black bg-black/10" />
+          <div className="h-6 w-20 border-2 border-black bg-black/10" />
+          <div className="h-10 w-10 opacity-0" />
+        </div>
+
+        {/* Desktop close button */}
         <button
           type="button"
           onClick={onClose}
           aria-label="Close format card"
-          className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+          className="absolute right-4 top-4 hidden lg:flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
         >
           {"✕"}
         </button>
 
-        <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
-          <div className="relative animate-pulse">
-            <div className="border-2 border-black bg-white p-3 shadow-[4px_4px_0_#000]">
+        <div className="grid gap-0 lg:gap-8 lg:grid-cols-[320px_1fr] lg:p-6">
+          {/* Preview skeleton */}
+          <div className="animate-pulse">
+            <div className="lg:hidden aspect-video w-full bg-black/10 border-b-2 border-black" />
+            <div className="hidden lg:block border-2 border-black bg-white p-3 shadow-[4px_4px_0_#000]">
               <div className="aspect-[4/5] w-full border-2 border-black bg-black/10" />
               <div className="mt-4 h-4 w-24 border-2 border-black bg-black/10" />
             </div>
           </div>
 
-          <div className="animate-pulse pt-10 lg:pt-3">
-            <div className={`inline-flex h-10 w-32 border-2 border-black ${accentClass}`} />
-            <div className="mt-5 h-12 w-full max-w-2xl border-2 border-black bg-black/10" />
-            <div className="mt-3 h-12 w-4/5 border-2 border-black bg-black/10" />
+          {/* Info skeleton */}
+          <div className="animate-pulse p-4 lg:p-0 lg:pt-3">
+            <div className={`inline-flex h-8 w-28 border-2 border-black ${accentClass}`} />
+            <div className="mt-4 h-7 w-full border-2 border-black bg-black/10" />
+            <div className="mt-2 h-7 w-4/5 border-2 border-black bg-black/10" />
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <div className="h-10 w-40 border-2 border-black bg-black/10" />
-              <div className="h-10 w-28 border-2 border-black bg-black/10" />
+            <div className="mt-4 flex gap-3">
+              <div className="h-12 w-12 rounded-full border-2 border-black bg-black/10" />
+              <div className="flex flex-col gap-2 justify-center">
+                <div className="h-4 w-24 border-2 border-black bg-black/10" />
+                <div className="h-3 w-16 border-2 border-black bg-black/10" />
+              </div>
             </div>
 
-            <div className="mt-8">
-              <div className="h-4 w-32 border-2 border-black bg-black/10" />
-              <div className="mt-3 flex flex-wrap gap-3">
+            <div className="mt-3 flex flex-wrap gap-2">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="h-9 w-20 border-2 border-black bg-black/10" />
+              ))}
+            </div>
+
+            <div className="mt-5">
+              <div className="h-4 w-28 border-2 border-black bg-black/10" />
+              <div className="mt-3 flex gap-2">
                 {[1, 2, 3].map((n) => (
-                  <div key={n} className="h-12 w-12 border-2 border-black bg-black/10" />
+                  <div key={n} className="h-11 w-20 border-2 border-black bg-black/10" />
                 ))}
               </div>
             </div>
 
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <div className="h-16 flex-1 border-2 border-black bg-black/10" />
-              <div className="h-16 flex-1 border-2 border-black bg-black/10" />
+            <div className="mt-5 flex flex-col gap-3">
+              <div className="h-14 w-full border-2 border-black bg-black/10" />
+              <div className="h-14 w-full border-2 border-black bg-black/10" />
             </div>
           </div>
         </div>
@@ -243,25 +274,112 @@ export default function FormatCard({
 
   // ── Rendered ──────────────────────────────────────────────────────────────
   return (
-    <article className="relative border-2 border-black bg-white p-5 shadow-[6px_6px_0_#000] md:p-6">
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Close format card"
-        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-      >
-        {"✕"}
-      </button>
+    <article className="relative border-2 border-black bg-white shadow-[6px_6px_0_#000] overflow-hidden">
 
-      <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
-        {/* ── Kolom kiri: preview ──────────────────────────────────── */}
+      {/* ── MOBILE HEADER BAR (only on mobile) ────────────────────── */}
+      <div className="flex items-center justify-between border-b-2 border-black px-4 py-3 lg:hidden">
+        {/* Tombol kiri: [X] [−] */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close format card"
+            className="flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+          >
+            ✕
+          </button>
+          <button
+            type="button"
+            onClick={() => setMinimized((p) => !p)}
+            aria-label={minimized ? "Expand card" : "Minimize card"}
+            className="flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+          >
+            <span
+              className={`inline-block transition-transform duration-300 ${minimized ? "rotate-180" : ""}`}
+              style={{ lineHeight: 1 }}
+            >
+              {minimized ? "＋" : "－"}
+            </span>
+          </button>
+        </div>
+
+        {/* TikSave title tengah */}
+        <span className="border-2 border-black px-4 py-1.5 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
+          {minimized && videoData ? (
+            <span className="max-w-[140px] truncate inline-block align-middle text-xs">
+              {videoData.title}
+            </span>
+          ) : "TikSave"}
+        </span>
+
+        {/* Spacer kanan biar center seimbang */}
+        <div className="h-10 w-10 opacity-0 pointer-events-none" />
+      </div>
+
+      {/* ── DESKTOP HEADER BAR (only on desktop) ─────────────────── */}
+      <div className="hidden lg:flex items-center justify-between border-b-2 border-black px-5 py-3">
+        {/* Logo/label kiri */}
+        <span className="border-2 border-black px-4 py-1.5 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
+          {minimized && videoData ? (
+            <span className="max-w-xs truncate inline-block align-middle text-xs">
+              {videoData.title}
+            </span>
+          ) : "TikSave"}
+        </span>
+
+        {/* Tombol kanan: [－] [✕] */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMinimized((p) => !p)}
+            aria-label={minimized ? "Expand card" : "Minimize card"}
+            className="flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+          >
+            <span
+              className={`inline-block transition-transform duration-300 ${minimized ? "rotate-180" : ""}`}
+              style={{ lineHeight: 1 }}
+            >
+              {minimized ? "＋" : "－"}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close format card"
+            className="flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+          >
+            {"✕"}
+          </button>
+        </div>
+      </div>
+
+      {/* ── COLLAPSIBLE BODY — animasi smooth collapse/expand ─── */}
+      <div
+        className="transition-all duration-500 ease-in-out"
+        style={{
+          maxHeight: minimized ? "0px" : "9999px",
+          opacity: minimized ? 0 : 1,
+          overflow: "hidden",
+          pointerEvents: minimized ? "none" : undefined,
+        }}
+      >
+
+      {/* ── LAYOUT GRID: Mobile=stacked | Desktop=side-by-side ─── */}
+      <div className="grid gap-0 lg:gap-8 lg:grid-cols-[320px_1fr] lg:p-6">
+
+        {/* ── Kolom kiri / atas: preview ────────────────────────── */}
         <div className="relative">
           {isPhotoPost && images.length > 0 ? (
             // MODE FOTO: carousel
-            <PhotoCarousel images={images} title={videoData.title} />
+            <div className="p-4 lg:p-0">
+              <PhotoCarousel images={images} title={videoData.title} />
+            </div>
           ) : (
-            // MODE VIDEO: preview video / thumbnail
-            <div className="border-2 border-black bg-white p-3 shadow-[4px_4px_0_#000]">
+            // MODE VIDEO: satu elemen untuk mobile & desktop — wrapper responsif
+            <div className="
+              border-b-2 border-black bg-black
+              lg:border-2 lg:bg-white lg:p-3 lg:shadow-[4px_4px_0_#000]
+            ">
               {previewVideoSrc && failedVideoSrc !== previewVideoSrc ? (
                 <video
                   controls
@@ -269,7 +387,7 @@ export default function FormatCard({
                   preload="metadata"
                   poster={thumbnailSrc || undefined}
                   onError={() => setFailedVideoSrc(previewVideoSrc)}
-                  className="aspect-[4/5] w-full border-2 border-black bg-black object-cover"
+                  className="w-full aspect-video bg-black object-contain lg:aspect-[4/5] lg:border-2 lg:border-black lg:object-cover"
                 >
                   <source src={previewVideoSrc} />
                   Your browser does not support the video tag.
@@ -279,25 +397,26 @@ export default function FormatCard({
                   src={thumbnailSrc}
                   alt={videoData.title}
                   onError={() => setFailedThumbnailSrc(thumbnailSrc)}
-                  className="aspect-[4/5] w-full border-2 border-black object-cover"
+                  className="w-full aspect-video object-cover lg:aspect-[4/5] lg:border-2 lg:border-black"
                 />
               ) : (
-                <div className="flex aspect-[4/5] w-full items-center justify-center border-2 border-black bg-[var(--bg)] px-4 text-center font-syne text-xl font-bold text-[var(--black)]">
+                <div className="flex aspect-video w-full items-center justify-center bg-[var(--bg)] px-4 text-center font-syne text-xl font-bold text-[var(--black)] lg:aspect-[4/5] lg:border-2 lg:border-black">
                   No Preview
                 </div>
               )}
-              <div className="mt-4 border-2 border-black bg-[var(--bg)] px-3 py-2 text-center text-xs font-black uppercase tracking-[0.14em] text-[var(--black)]">
+              {/* Label TikSave — hanya desktop */}
+              <div className="hidden lg:block mt-4 border-2 border-black bg-[var(--bg)] px-3 py-2 text-center text-xs font-black uppercase tracking-[0.14em] text-[var(--black)]">
                 TikSave
               </div>
             </div>
           )}
         </div>
 
-        {/* ── Kolom kanan: info & actions ──────────────────────────── */}
-        <div className="pt-10 lg:pt-3">
+        {/* ── Kolom kanan / bawah: info & actions ──────────────── */}
+        <div className="p-4 lg:p-0 lg:pt-3">
           {/* Badge status */}
           <span
-            className={`inline-flex border-2 border-black px-4 py-2 text-sm font-black uppercase tracking-[0.14em] shadow-[3px_3px_0_#000] ${accentClass}`}
+            className={`inline-flex border-2 border-black px-4 py-1.5 text-xs font-black uppercase tracking-[0.14em] shadow-[3px_3px_0_#000] ${accentClass}`}
           >
             {isPhotoPost
               ? `📷 Photo (${images.length} foto)`
@@ -307,26 +426,26 @@ export default function FormatCard({
           </span>
 
           {/* Judul */}
-          <h2 className="mt-5 max-w-3xl font-syne text-3xl font-bold leading-tight text-[var(--black)] md:text-4xl">
+          <h2 className="mt-3 font-syne text-2xl font-bold leading-tight text-[var(--black)] md:text-3xl lg:text-4xl">
             {videoData.title}
           </h2>
 
           {/* Creator */}
-          <div className="mt-6 flex items-center gap-4">
+          <div className="mt-4 flex items-center gap-3">
             {avatarSrc && failedAvatarSrc !== avatarSrc ? (
               <img
                 src={avatarSrc}
                 alt={videoData.nickname}
                 onError={() => setFailedAvatarSrc(avatarSrc)}
-                className="h-14 w-14 rounded-full border-2 border-black object-cover shadow-[3px_3px_0_#000]"
+                className="h-12 w-12 rounded-full border-2 border-black object-cover shadow-[3px_3px_0_#000]"
               />
             ) : (
-              <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-black bg-lime text-lg font-black text-[var(--black)] shadow-[3px_3px_0_#000]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-black bg-lime text-base font-black text-[var(--black)] shadow-[3px_3px_0_#000]">
                 {videoData.nickname.charAt(0).toUpperCase()}
               </div>
             )}
             <div>
-              <p className="font-syne text-xl font-bold text-[var(--black)]">
+              <p className="font-syne text-lg font-bold text-[var(--black)] leading-tight">
                 {videoData.nickname}
               </p>
               <p className="text-sm font-medium text-[var(--black)]/70">
@@ -336,19 +455,19 @@ export default function FormatCard({
           </div>
 
           {/* Stats */}
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-3 flex flex-wrap gap-2">
             {videoData.duration ? (
-              <span className="border-2 border-black bg-white px-3 py-2 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
+              <span className="border-2 border-black bg-white px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
                 {videoData.duration}
               </span>
             ) : null}
             {typeof videoData.views === "number" ? (
-              <span className="border-2 border-black bg-[var(--bg)] px-3 py-2 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
+              <span className="border-2 border-black bg-[var(--bg)] px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
                 {videoData.views.toLocaleString()} views
               </span>
             ) : null}
             {typeof videoData.likes === "number" ? (
-              <span className="border-2 border-black bg-[var(--bg)] px-3 py-2 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
+              <span className="border-2 border-black bg-[var(--bg)] px-3 py-1.5 text-sm font-bold text-[var(--black)] shadow-[3px_3px_0_#000]">
                 {videoData.likes.toLocaleString()} likes
               </span>
             ) : null}
@@ -357,7 +476,7 @@ export default function FormatCard({
           {/* ── Foto mode: Choose Photo ─────────────────────────────── */}
           {isPhotoPost ? (
             <>
-              <div className="mt-8">
+              <div className="mt-6">
                 <p className="text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
                   Choose Photo
                   <span className="ml-2 font-medium normal-case text-[var(--black)]/60">
@@ -373,7 +492,7 @@ export default function FormatCard({
                         type="button"
                         onClick={() => togglePhotoSelection(idx)}
                         aria-label={`Pilih foto ${idx + 1}`}
-                        className={`h-12 w-12 border-2 border-black text-sm font-black shadow-[3px_3px_0_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
+                        className={`h-11 w-11 border-2 border-black text-sm font-black shadow-[3px_3px_0_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none ${
                           isSelected
                             ? "bg-pink text-white"
                             : "bg-[var(--bg)] text-[var(--black)]"
@@ -393,7 +512,7 @@ export default function FormatCard({
                 type="button"
                 onClick={() => void handleDownloadPhotos()}
                 disabled={downloadingPhotos}
-                className={`btn-brutal mt-10 flex w-full items-center justify-center gap-2 bg-pink px-6 py-4 text-lg font-black text-white ${
+                className={`btn-brutal mt-6 flex w-full items-center justify-center gap-2 bg-pink px-6 py-4 text-lg font-black text-white ${
                   downloadingPhotos ? "cursor-not-allowed opacity-70" : ""
                 }`}
               >
@@ -412,11 +531,11 @@ export default function FormatCard({
           ) : (
             /* ── Video mode: Choose Quality + MP4 + MP3 ──────────── */
             <>
-              <div className="mt-8">
+              <div className="mt-5">
                 <p className="text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
                   Choose Quality
                 </p>
-                <div className="mt-3 flex flex-wrap gap-3">
+                <div className="mt-3 flex flex-wrap gap-2">
                   {qualities.map((quality) => {
                     const isSelected = selectedQuality === quality;
                     return (
@@ -424,7 +543,7 @@ export default function FormatCard({
                         key={quality}
                         type="button"
                         onClick={() => setSelectedQuality(quality)}
-                        className={`border-2 border-black px-4 py-3 text-sm font-black uppercase tracking-[0.14em] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none ${
+                        className={`border-2 border-black px-4 py-2.5 text-sm font-black uppercase tracking-[0.14em] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none active:translate-x-0.5 active:translate-y-0.5 active:shadow-none ${
                           isSelected
                             ? "bg-lime text-[var(--black)]"
                             : "bg-[var(--bg)] text-[var(--black)]"
@@ -437,15 +556,16 @@ export default function FormatCard({
                 </div>
               </div>
 
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+              {/* Download buttons: full-width stacked on mobile */}
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
                 <a
                   href={primaryHref}
                   onClick={() => setFormat("video")}
-                  className={`btn-brutal flex-1 flex items-center justify-center bg-lime px-6 py-4 text-center text-lg font-black text-[var(--black)] ${
+                  className={`btn-brutal flex w-full items-center justify-center gap-2 bg-lime px-6 py-4 text-center text-base font-black text-[var(--black)] sm:flex-1 ${
                     format === "video" ? "ring-4 ring-black" : ""
                   }`}
                 >
-                  {"⬇"} Download MP4
+                  ↓ Download MP4
                 </a>
 
                 <button
@@ -455,7 +575,7 @@ export default function FormatCard({
                     handleMp3Download();
                   }}
                   disabled={mp3Loading}
-                  className={`btn-brutal flex-1 bg-pink px-6 py-4 text-lg font-black text-white ${
+                  className={`btn-brutal flex w-full items-center justify-center gap-2 bg-pink px-6 py-4 text-base font-black text-white sm:flex-1 ${
                     mp3Loading ? "cursor-not-allowed opacity-80" : ""
                   } ${format === "mp3" ? "ring-4 ring-black" : ""}`}
                 >
@@ -481,6 +601,9 @@ export default function FormatCard({
             </>
           )}
         </div>
+      </div>
+
+      {/* ── end collapsible body ── */}
       </div>
     </article>
   );

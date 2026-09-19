@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 type HeroSectionProps = {
   errorMessage?: string | null;
@@ -65,10 +65,29 @@ export default function HeroSection({
     void onDownload(trimmed);
   };
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLElement>(null);
+
+  // Tutup menu saat klik di luar header
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
+
   return (
     <section id="home" className="flex flex-1 flex-col py-6 md:py-8">
-      <header className="border-2 border-black bg-white px-4 py-4 shadow-[6px_6px_0_#000] md:px-6">
-        <div className="flex flex-col gap-4 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center">
+      <header ref={menuRef} className="relative border-2 border-black bg-white shadow-[6px_6px_0_#000]">
+
+        {/* ── Navbar row ───────────────────────────────────────────── */}
+        <div className="flex items-center justify-between px-4 py-4 md:px-6 md:grid md:grid-cols-[1fr_auto_1fr]">
+
+          {/* Logo */}
           <a
             href="#home"
             className="font-syne text-2xl font-black tracking-tight text-[var(--black)]"
@@ -76,7 +95,8 @@ export default function HeroSection({
             TikSave
           </a>
 
-          <nav className="flex flex-wrap items-center justify-center gap-5 text-sm font-bold uppercase tracking-[0.14em] text-[var(--black)]">
+          {/* Nav links — hidden on mobile, visible on md+ */}
+          <nav className="hidden md:flex items-center justify-center gap-5 text-sm font-bold uppercase tracking-[0.14em] text-[var(--black)]">
             <a href="#home" className="transition-transform hover:-translate-y-0.5">
               Home
             </a>
@@ -88,14 +108,80 @@ export default function HeroSection({
             </a>
           </nav>
 
-          <div className="flex justify-start md:justify-end">
+          {/* Right side */}
+          <div className="flex items-center gap-3 md:justify-end">
+            {/* Try Free — hidden on mobile */}
             <a
               href="#download-form"
-              className="btn-brutal inline-flex items-center justify-center bg-lime px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]"
+              className="hidden md:inline-flex btn-brutal items-center justify-center bg-lime px-5 py-3 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]"
             >
               Try Free
             </a>
+
+            {/* Hamburger button — only on mobile */}
+            <button
+              type="button"
+              onClick={() => setMenuOpen((prev) => !prev)}
+              aria-label={menuOpen ? "Tutup menu" : "Buka menu"}
+              aria-expanded={menuOpen}
+              className="flex md:hidden h-10 w-10 flex-col items-center justify-center gap-1.5 border-2 border-black bg-[var(--bg)] shadow-[3px_3px_0_#000] transition-transform active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            >
+              {/* Animated 3-bar icon */}
+              <span
+                className={`block h-0.5 w-5 bg-[var(--black)] transition-all duration-200 ${
+                  menuOpen ? "translate-y-2 rotate-45" : ""
+                }`}
+              />
+              <span
+                className={`block h-0.5 w-5 bg-[var(--black)] transition-all duration-200 ${
+                  menuOpen ? "opacity-0" : ""
+                }`}
+              />
+              <span
+                className={`block h-0.5 w-5 bg-[var(--black)] transition-all duration-200 ${
+                  menuOpen ? "-translate-y-2 -rotate-45" : ""
+                }`}
+              />
+            </button>
           </div>
+        </div>
+
+        {/* ── Mobile dropdown menu ──────────────────────────────────── */}
+        <div
+          className={`md:hidden overflow-hidden border-t-2 border-black transition-all duration-300 ease-in-out ${
+            menuOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <nav className="flex flex-col px-4 pb-4 pt-3 gap-1">
+            <a
+              href="#home"
+              onClick={() => setMenuOpen(false)}
+              className="block border-2 border-transparent px-3 py-3 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)] transition-colors hover:border-black hover:bg-[var(--bg)]"
+            >
+              Home
+            </a>
+            <a
+              href="#how-it-works"
+              onClick={() => setMenuOpen(false)}
+              className="block border-2 border-transparent px-3 py-3 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)] transition-colors hover:border-black hover:bg-[var(--bg)]"
+            >
+              How It Works
+            </a>
+            <a
+              href="#faq"
+              onClick={() => setMenuOpen(false)}
+              className="block border-2 border-transparent px-3 py-3 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)] transition-colors hover:border-black hover:bg-[var(--bg)]"
+            >
+              FAQ
+            </a>
+            <a
+              href="#download-form"
+              onClick={() => setMenuOpen(false)}
+              className="btn-brutal mt-2 block bg-lime px-5 py-3 text-center text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]"
+            >
+              Try Free
+            </a>
+          </nav>
         </div>
       </header>
 
