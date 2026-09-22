@@ -97,6 +97,7 @@ export async function GET(request: Request) {
   const targetUrl = searchParams.get("url");
   const sourceUrl = searchParams.get("sourceUrl");
   const shouldDownload = searchParams.get("download") === "1";
+  const filenameParam = searchParams.get("filename");
 
   try {
     const upstreamUrl = await resolveUpstreamVideoUrl(targetUrl, sourceUrl);
@@ -150,7 +151,14 @@ export async function GET(request: Request) {
     const headers = buildProxyHeaders(upstreamResponse);
 
     if (shouldDownload) {
-      headers.set("Content-Disposition", 'attachment; filename="sedotvidio-video.mp4"');
+      // Gunakan nama file dari query param jika ada, fallback ke default
+      const safeFilename = filenameParam
+        ? filenameParam.replace(/[^\w\s._-]/g, "").slice(0, 80) + ".mp4"
+        : "sedotvidio-video.mp4";
+      headers.set(
+        "Content-Disposition",
+        `attachment; filename="${safeFilename}"; filename*=UTF-8''${encodeURIComponent(safeFilename)}`
+      );
     }
 
     return new Response(upstreamResponse.body, {

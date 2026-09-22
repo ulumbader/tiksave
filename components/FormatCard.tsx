@@ -21,6 +21,18 @@ import {
 
 export type DownloadFormat = "video" | "mp3";
 
+/** Ubah title jadi nama file yang aman: lowercase, spasi → underscore, hapus karakter berbahaya */
+function slugifyTitle(title: string, maxLength = 60): string {
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")   // hapus karakter selain huruf/angka/spasi/dash
+    .replace(/\s+/g, "_")       // spasi → underscore
+    .replace(/-+/g, "-")         // normalkan dash
+    .replace(/^_+|_+$/g, "")    // trim underscore di awal/akhir
+    .slice(0, maxLength)         // batas panjang
+    || "sedotvidio";             // fallback jika kosong
+}
+
 type FormatCardProps = {
   loading: boolean;
   videoData: VideoData | null;
@@ -146,11 +158,12 @@ export default function FormatCard({
       ? "bg-lime text-[var(--black)]"
       : "bg-pink text-white";
 
-  // Download MP4: pakai downloadUrl langsung (sudah tersedia dari preview) — tidak perlu fetch ulang API
+  // Download MP4: pakai downloadUrl langsung — kirim filename ke server untuk Content-Disposition
+  const videoSlug = slugifyTitle(videoData?.title ?? "");
   const primaryHref = videoData?.downloadUrl
-    ? `/api/video?url=${encodeURIComponent(videoData.downloadUrl)}&download=1`
+    ? `/api/video?url=${encodeURIComponent(videoData.downloadUrl)}&download=1&filename=${encodeURIComponent(videoSlug)}`
     : videoData?.sourceUrl
-      ? `/api/video?sourceUrl=${encodeURIComponent(videoData.sourceUrl)}&download=1`
+      ? `/api/video?sourceUrl=${encodeURIComponent(videoData.sourceUrl)}&download=1&filename=${encodeURIComponent(videoSlug)}`
       : undefined;
 
   // Preview: pakai downloadUrl langsung
@@ -173,7 +186,8 @@ export default function FormatCard({
 
   const handleMp3Download = () => {
     if (!conversionVideoSrc) return;
-    void convertToMp3(conversionVideoSrc).catch((error) => {
+    const slug = slugifyTitle(videoData?.title ?? "");
+    void convertToMp3(conversionVideoSrc, slug).catch((error) => {
       console.error(error);
     });
   };
@@ -196,6 +210,7 @@ export default function FormatCard({
   const handleDownloadPhotos = useCallback(async () => {
     if (!images.length || downloadingPhotos) return;
     setDownloadingPhotos(true);
+    const slug = slugifyTitle(videoData?.title ?? "");
     const sortedIndices = [...selectedPhotos].sort((a, b) => a - b);
     for (const idx of sortedIndices) {
       const url = images[idx];
@@ -203,7 +218,7 @@ export default function FormatCard({
       const href = `/api/photo?url=${encodeURIComponent(url)}&index=${idx + 1}`;
       const a = document.createElement("a");
       a.href = href;
-      a.download = `tiktok_photo_${idx + 1}.jpg`;
+      a.download = `${slug}_photo_${idx + 1}.jpg`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -211,7 +226,7 @@ export default function FormatCard({
       await new Promise((r) => setTimeout(r, 400));
     }
     setDownloadingPhotos(false);
-  }, [images, selectedPhotos, downloadingPhotos]);
+  }, [images, selectedPhotos, downloadingPhotos, videoData?.title]);
 
   // ── Loading skeleton ──────────────────────────────────────────────────────
   if (loading) {

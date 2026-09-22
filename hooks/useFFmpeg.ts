@@ -33,7 +33,7 @@ export function useFFmpeg() {
     isLoadedRef.current = true;
   };
 
-  const convertToMp3 = async (videoUrl: string): Promise<void> => {
+  const convertToMp3 = async (videoUrl: string, filename?: string): Promise<void> => {
     setLoading(true);
     setProgress(0);
 
@@ -62,7 +62,7 @@ export function useFFmpeg() {
       const a = document.createElement("a");
 
       a.href = url;
-      a.download = "sedotvidio-audio.mp3";
+      a.download = filename ? `${filename}.mp3` : "sedotvidio-audio.mp3";
       a.click();
       URL.revokeObjectURL(url);
     } finally {
