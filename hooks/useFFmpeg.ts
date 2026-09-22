@@ -62,7 +62,7 @@ export function useFFmpeg() {
       const a = document.createElement("a");
 
       a.href = url;
-      a.download = "tiksave-audio.mp3";
+      a.download = "sedotvidio-audio.mp3";
       a.click();
       URL.revokeObjectURL(url);
     } finally {

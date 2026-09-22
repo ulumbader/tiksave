@@ -1,3 +1,5 @@
+import { IconClose } from "@/components/icons";
+
 type ErrorPopupProps = {
   message: string;
   onClose: () => void;
@@ -18,20 +20,20 @@ export default function ErrorPopup({ message, onClose }: ErrorPopupProps) {
               id="download-error-title"
               className="font-syne text-2xl font-black leading-none"
             >
-              Download Failed
+              Unduhan Gagal
             </p>
             <p className="mt-2 text-xs font-black uppercase tracking-[0.14em] text-white/90">
-              Try another TikTok link or retry the request.
+              Coba tautan TikTok lain atau ulangi permintaan.
             </p>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close error popup"
+            aria-label="Tutup popup error"
             className="flex h-10 w-10 shrink-0 items-center justify-center border-2 border-black bg-white text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
           >
-            {"\u2715"}
+            <IconClose className="h-5 w-5" />
           </button>
         </div>
 
@@ -45,7 +47,7 @@ export default function ErrorPopup({ message, onClose }: ErrorPopupProps) {
             onClick={onClose}
             className="btn-brutal mt-4 bg-lime px-4 py-3 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]"
           >
-            Dismiss
+            Tutup
           </button>
         </div>
       </div>

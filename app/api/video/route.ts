@@ -150,7 +150,7 @@ export async function GET(request: Request) {
     const headers = buildProxyHeaders(upstreamResponse);
 
     if (shouldDownload) {
-      headers.set("Content-Disposition", 'attachment; filename="tiksave-video.mp4"');
+      headers.set("Content-Disposition", 'attachment; filename="sedotvidio-video.mp4"');
     }
 
     return new Response(upstreamResponse.body, {

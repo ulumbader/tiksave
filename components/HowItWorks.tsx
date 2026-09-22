@@ -1,26 +1,57 @@
-const steps = [
+import type { ReactNode } from "react";
+import { IconLink, IconHeadphones, IconDownload } from "@/components/icons";
+
+const steps: ReadonlyArray<{
+  title: string;
+  description: string;
+  icon: ReactNode;
+  cardClass: string;
+  badgeClass: string;
+}> = [
   {
-    title: "Paste Link",
-    description: "Copy any TikTok URL and drop it into the input bar in one tap.",
-    icon: "\uD83D\uDD17",
+    title: "Tempel Tautan",
+    description: "Salin tautan TikTok mana saja dan tempel ke kolom input dalam satu ketukan.",
+    icon: <IconLink className="h-10 w-10" />,
     cardClass: "bg-white text-[var(--black)]",
     badgeClass: "bg-lime text-[var(--black)]",
   },
   {
-    title: "Choose Format",
-    description: "Pick high-quality video or extract clean MP3 audio before downloading.",
-    icon: "\uD83C\uDFA7",
+    title: "Pilih Format",
+    description: "Pilih video berkualitas tinggi atau ekstrak audio MP3 jernih sebelum mengunduh.",
+    icon: <IconHeadphones className="h-10 w-10" />,
     cardClass: "bg-pink text-white",
     badgeClass: "bg-black text-lime",
   },
   {
-    title: "Download",
-    description: "Save the file instantly with a bold, fast, no-fuss download flow.",
-    icon: "\u2B07",
+    title: "Unduh",
+    description: "Simpan file secara instan dengan alur unduhan yang cepat dan tanpa ribet.",
+    icon: <IconDownload className="h-10 w-10" />,
     cardClass: "bg-black text-white",
     badgeClass: "bg-lime text-[var(--black)]",
   },
-] as const;
+];
+
+// HowTo JSON-LD schema for Google rich snippets
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: "Cara Mengunduh Video TikTok Tanpa Watermark dengan SedotVidio",
+  description:
+    "Panduan langkah demi langkah untuk mengunduh video TikTok tanpa watermark dan menyimpan audio MP3 menggunakan SedotVidio secara gratis.",
+  totalTime: "PT1M",
+  tool: [
+    {
+      "@type": "HowToTool",
+      name: "Browser web (Chrome, Firefox, Safari, dll.)",
+    },
+  ],
+  step: steps.map((step, index) => ({
+    "@type": "HowToStep",
+    position: index + 1,
+    name: step.title,
+    text: step.description,
+  })),
+};
 
 export default function HowItWorks() {
   return (
@@ -28,13 +59,18 @@ export default function HowItWorks() {
       id="how-it-works"
       className="mx-auto w-full max-w-6xl py-8 md:py-12"
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
+      />
+
       <div className="flex flex-col gap-4">
         <span className="inline-flex w-fit border-2 border-black bg-lime px-3 py-2 text-xs font-black uppercase tracking-[0.18em] text-[var(--black)] shadow-[3px_3px_0_#000]">
-          Simple Steps
+          Langkah Mudah
         </span>
 
         <h2 className="max-w-3xl font-syne text-4xl font-black leading-tight tracking-[-0.04em] text-[var(--black)] md:text-5xl">
-          3 Easy Steps To Download
+          Cara Unduh Video TikTok dalam 3 Langkah
         </h2>
       </div>
 
@@ -50,7 +86,7 @@ export default function HowItWorks() {
               >
                 {index + 1}
               </span>
-              <span className="text-4xl leading-none">{step.icon}</span>
+              <span className="leading-none">{step.icon}</span>
             </div>
 
             <h3 className="mt-6 font-syne text-2xl font-bold">{step.title}</h3>

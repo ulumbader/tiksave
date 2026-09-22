@@ -1,34 +1,49 @@
 "use client";
 
 import { useState } from "react";
+import { IconFaqChevron } from "@/components/icons";
 
 const faqs = [
   {
-    question: "Is TikSave free to use?",
+    question: "Apakah SedotVidio gratis?",
     answer:
-      "Yes. TikSave is designed as a free downloader for quick TikTok video and MP3 saves.",
+      "Ya. SedotVidio dirancang sebagai pengunduh gratis untuk menyimpan video dan MP3 TikTok dengan cepat.",
   },
   {
-    question: "Can I download without watermark?",
+    question: "Bisakah saya mengunduh tanpa watermark?",
     answer:
-      "Yes. The intended flow is to provide clean downloads without the standard TikTok watermark.",
+      "Ya. SedotVidio menyediakan unduhan bersih tanpa watermark standar TikTok.",
   },
   {
-    question: "What formats are supported?",
+    question: "Format apa saja yang didukung?",
     answer:
-      "You can choose between video downloads and MP3 audio extraction from the same TikTok link.",
+      "Anda bisa memilih antara unduhan video atau ekstraksi audio MP3 dari tautan TikTok yang sama.",
   },
   {
-    question: "Is there a download limit?",
+    question: "Apakah ada batas unduhan?",
     answer:
-      "There is no limit shown in the current interface, so casual repeated downloads are supported.",
+      "Tidak ada batas yang ditampilkan di antarmuka saat ini, jadi unduhan berulang secara kasual didukung.",
   },
   {
-    question: "Does it work on mobile?",
+    question: "Apakah bisa digunakan di HP?",
     answer:
-      "Yes. The layout is responsive and the downloader flow is designed to work on phones and tablets.",
+      "Ya. Tata letak responsif dan alur pengunduhan dirancang untuk bekerja di ponsel dan tablet.",
   },
 ] as const;
+
+// FAQPage JSON-LD schema for Google rich snippets
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer,
+    },
+  })),
+};
 
 export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -39,8 +54,13 @@ export default function FAQSection() {
 
   return (
     <section id="faq" className="mx-auto w-full max-w-6xl py-8 md:py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+
       <h2 className="max-w-3xl font-syne text-4xl font-black leading-tight tracking-[-0.04em] text-[var(--black)] md:text-5xl">
-        Frequently Asked Questions
+        Pertanyaan yang Sering Diajukan
       </h2>
 
       <div className="mt-8 flex flex-col gap-4">
@@ -61,11 +81,11 @@ export default function FAQSection() {
                   {item.question}
                 </span>
                 <span
-                  className={`inline-flex h-10 w-10 shrink-0 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black shadow-[3px_3px_0_#000] transition-transform ${
+                  className={`inline-flex h-10 w-10 shrink-0 items-center justify-center border-2 border-black bg-[var(--bg)] shadow-[3px_3px_0_#000] transition-transform ${
                     isOpen ? "rotate-90" : ""
                   }`}
                 >
-                  {">"}
+                  <IconFaqChevron className="h-5 w-5" />
                 </span>
               </button>
 

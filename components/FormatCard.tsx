@@ -5,6 +5,19 @@ import { useState, useCallback } from "react";
 
 import { useFFmpeg } from "@/hooks/useFFmpeg";
 import type { VideoData } from "@/types/video";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconClose,
+  IconDownload,
+  IconMusicNote,
+  IconCamera,
+  IconGear,
+  IconSpinner,
+  IconVideo,
+  IconMinus,
+  IconPlus,
+} from "@/components/icons";
 
 export type DownloadFormat = "video" | "mp3";
 
@@ -14,7 +27,7 @@ type FormatCardProps = {
   onClose: () => void;
 };
 
-const qualities = ["720p", "1080p", "Original"] as const;
+const qualities = ["720p", "1080p", "Asli"] as const;
 type VideoQuality = (typeof qualities)[number];
 
 // ─── Photo Carousel Sub-component ────────────────────────────────────────────
@@ -74,7 +87,7 @@ function PhotoCarousel({ images, title }: PhotoCarouselProps) {
             aria-label="Foto sebelumnya"
             className="pointer-events-auto flex h-10 w-10 items-center justify-center border-2 border-black bg-white text-lg font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
           >
-            ←
+            <IconChevronLeft className="h-5 w-5" />
           </button>
           <button
             type="button"
@@ -83,14 +96,14 @@ function PhotoCarousel({ images, title }: PhotoCarouselProps) {
             aria-label="Foto berikutnya"
             className="pointer-events-auto flex h-10 w-10 items-center justify-center border-2 border-black bg-white text-lg font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-all hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
           >
-            →
+            <IconChevronRight className="h-5 w-5" />
           </button>
         </div>
       )}
 
       {/* Label */}
       <div className="mt-3 border-2 border-black bg-[var(--bg)] px-3 py-2 text-center text-xs font-black uppercase tracking-[0.14em] text-[var(--black)]">
-        TikSave
+        SedotVidio
       </div>
     </div>
   );
@@ -104,7 +117,7 @@ export default function FormatCard({
   onClose,
 }: FormatCardProps) {
   const [failedVideoSrc, setFailedVideoSrc] = useState<string | null>(null);
-  const [selectedQuality, setSelectedQuality] = useState<VideoQuality>("Original");
+  const [selectedQuality, setSelectedQuality] = useState<VideoQuality>("Asli");
   const [failedThumbnailSrc, setFailedThumbnailSrc] = useState<string | null>(null);
   const [failedAvatarSrc, setFailedAvatarSrc] = useState<string | null>(null);
   // format state dikelola internal — tiap card independen
@@ -215,10 +228,10 @@ export default function FormatCard({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close format card"
+          aria-label="Tutup kartu format"
           className="absolute right-4 top-4 hidden lg:flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
         >
-          {"✕"}
+          <IconClose className="h-5 w-5" />
         </button>
 
         <div className="grid gap-0 lg:gap-8 lg:grid-cols-[320px_1fr] lg:p-6">
@@ -283,33 +296,32 @@ export default function FormatCard({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close format card"
+            aria-label="Tutup kartu format"
             className="flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
           >
-            ✕
+            <IconClose className="h-5 w-5" />
           </button>
           <button
             type="button"
             onClick={() => setMinimized((p) => !p)}
-            aria-label={minimized ? "Expand card" : "Minimize card"}
+            aria-label={minimized ? "Perluas kartu" : "Perkecil kartu"}
             className="flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
           >
             <span
-              className={`inline-block transition-transform duration-300 ${minimized ? "rotate-180" : ""}`}
-              style={{ lineHeight: 1 }}
+              className={`inline-flex transition-transform duration-300 ${minimized ? "rotate-180" : ""}`}
             >
-              {minimized ? "＋" : "－"}
+              {minimized ? <IconPlus className="h-5 w-5" /> : <IconMinus className="h-5 w-5" />}
             </span>
           </button>
         </div>
 
-        {/* TikSave title tengah */}
+        {/* SedotVidio title tengah */}
         <span className="border-2 border-black px-4 py-1.5 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
           {minimized && videoData ? (
             <span className="max-w-[140px] truncate inline-block align-middle text-xs">
               {videoData.title}
             </span>
-          ) : "TikSave"}
+          ) : "SedotVidio"}
         </span>
 
         {/* Spacer kanan biar center seimbang */}
@@ -324,7 +336,7 @@ export default function FormatCard({
             <span className="max-w-xs truncate inline-block align-middle text-xs">
               {videoData.title}
             </span>
-          ) : "TikSave"}
+          ) : "SedotVidio"}
         </span>
 
         {/* Tombol kanan: [－] [✕] */}
@@ -332,23 +344,22 @@ export default function FormatCard({
           <button
             type="button"
             onClick={() => setMinimized((p) => !p)}
-            aria-label={minimized ? "Expand card" : "Minimize card"}
+            aria-label={minimized ? "Perluas kartu" : "Perkecil kartu"}
             className="flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
           >
             <span
-              className={`inline-block transition-transform duration-300 ${minimized ? "rotate-180" : ""}`}
-              style={{ lineHeight: 1 }}
+              className={`inline-flex transition-transform duration-300 ${minimized ? "rotate-180" : ""}`}
             >
-              {minimized ? "＋" : "－"}
+              {minimized ? <IconPlus className="h-5 w-5" /> : <IconMinus className="h-5 w-5" />}
             </span>
           </button>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close format card"
+            aria-label="Tutup kartu format"
             className="flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black text-[var(--black)] shadow-[3px_3px_0_#000] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
           >
-            {"✕"}
+            <IconClose className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -401,12 +412,12 @@ export default function FormatCard({
                   />
                 ) : (
                   <div className="flex aspect-video w-full items-center justify-center bg-[var(--bg)] px-4 text-center font-syne text-xl font-bold text-[var(--black)] lg:aspect-[4/5] lg:border-2 lg:border-black">
-                    No Preview
+                    Pratinjau Tidak Tersedia
                   </div>
                 )}
-                {/* Label TikSave — hanya desktop */}
+                {/* Label SedotVidio — hanya desktop */}
                 <div className="hidden lg:block mt-4 border-2 border-black bg-[var(--bg)] px-3 py-2 text-center text-xs font-black uppercase tracking-[0.14em] text-[var(--black)]">
-                  TikSave
+                  SedotVidio
                 </div>
               </div>
             )}
@@ -419,10 +430,10 @@ export default function FormatCard({
               className={`inline-flex border-2 border-black px-4 py-1.5 text-xs font-black uppercase tracking-[0.14em] shadow-[3px_3px_0_#000] ${accentClass}`}
             >
               {isPhotoPost
-                ? `📷 Photo (${images.length} foto)`
+                ? <><IconCamera className="inline h-4 w-4 mr-1 -mt-0.5" /> Foto ({images.length} foto)</>
                 : format === "video"
-                  ? "Video Ready"
-                  : "MP3 Ready"}
+                  ? <><IconVideo className="inline h-4 w-4 mr-1 -mt-0.5" /> Video Siap</>
+                  : <><IconMusicNote className="inline h-4 w-4 mr-1 -mt-0.5" /> MP3 Siap</>}
             </span>
 
             {/* Judul */}
@@ -468,7 +479,7 @@ export default function FormatCard({
               ) : null}
               
               {typeof videoData.views === "number" ? (
-                <span>{videoData.views.toLocaleString()} views</span>
+                <span>{videoData.views.toLocaleString()} tayangan</span>
               ) : null}
               
               {typeof videoData.views === "number" && typeof videoData.likes === "number" ? (
@@ -476,7 +487,7 @@ export default function FormatCard({
               ) : null}
               
               {typeof videoData.likes === "number" ? (
-                <span>{videoData.likes.toLocaleString()} likes</span>
+                <span>{videoData.likes.toLocaleString()} suka</span>
               ) : null}
             </div>
 
@@ -485,9 +496,9 @@ export default function FormatCard({
               <>
                 <div className="mt-6">
                   <p className="text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
-                    Choose Photo
+                    Pilih Foto
                     <span className="ml-2 font-medium normal-case text-[var(--black)]/60">
-                      (pilih foto yang ingin didownload)
+                      (pilih foto yang ingin diunduh)
                     </span>
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -522,10 +533,10 @@ export default function FormatCard({
                     }`}
                 >
                   {downloadingPhotos ? (
-                    <>⏳ Mengunduh foto...</>
+                    <><IconSpinner className="inline h-5 w-5 mr-1 animate-spin" /> Mengunduh foto...</>
                   ) : (
                     <>
-                      {"⬇"} Download Photo
+                      <IconDownload className="inline h-5 w-5 mr-1" /> Unduh Foto
                       {selectedPhotos.size > 1
                         ? ` (${selectedPhotos.size} foto)`
                         : ""}
@@ -538,7 +549,7 @@ export default function FormatCard({
               <>
                 <div className="mt-5">
                   <p className="text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
-                    Choose Quality
+                    Pilih Kualitas
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {qualities.map((quality) => {
@@ -568,7 +579,7 @@ export default function FormatCard({
                     className={`btn-brutal flex w-full items-center justify-center gap-2 bg-lime px-6 py-4 text-center text-base font-black text-[var(--black)] sm:flex-1 ${format === "video" ? "ring-4 ring-black" : ""
                       }`}
                   >
-                    ↓ Download MP4
+                    <IconVideo className="inline h-5 w-5 mr-1" /> Unduh MP4
                   </a>
 
                   <button
@@ -582,8 +593,8 @@ export default function FormatCard({
                       } ${format === "mp3" ? "ring-4 ring-black" : ""}`}
                   >
                     {mp3Loading
-                      ? `⚙️ Converting... ${progress}%`
-                      : "🎵 Download MP3"}
+                      ? <><IconGear className="inline h-5 w-5 mr-1 animate-spin" /> Mengonversi... {progress}%</>
+                      : <><IconMusicNote className="inline h-5 w-5 mr-1" /> Unduh MP3</>}
                   </button>
                 </div>
 
@@ -596,7 +607,7 @@ export default function FormatCard({
                       />
                     </div>
                     <p className="mt-2 text-sm font-black uppercase tracking-[0.14em] text-[var(--black)]">
-                      Converting... {progress}%
+                      Mengonversi... {progress}%
                     </p>
                   </div>
                 ) : null}

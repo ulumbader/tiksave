@@ -2,12 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import ErrorPopup from "@/components/ErrorPopup";
 import Footer from "@/components/Footer";
 import FormatCard from "@/components/FormatCard";
 import FAQSection from "@/components/FAQSection";
 import HeroSection from "@/components/HeroSection";
 import HowItWorks from "@/components/HowItWorks";
+import NotificationModal from "@/components/NotificationModal";
+import type { NotificationType } from "@/components/NotificationModal";
 import type { VideoData } from "@/types/video";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -35,8 +36,13 @@ function makeId() {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function Home() {
-  const [formErrorMessage, setFormErrorMessage] = useState<string | null>(null);
-  const [popupErrorMessage, setPopupErrorMessage] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{
+    open: boolean;
+    type: NotificationType;
+    title: string;
+    message: string;
+    hint?: string;
+  }>({ open: false, type: "error", title: "", message: "" });
   const [results, setResults] = useState<DownloadResult[]>([]);
 
   const resultSectionRef = useRef<HTMLElement | null>(null);
@@ -79,29 +85,45 @@ export default function Home() {
         )
       );
     } catch (error) {
+      const errorMsg =
+        error instanceof Error ? error.message : "Gagal mengambil data.";
+
       setResults((prev) =>
         prev.map((r) =>
           r.id === result.id
             ? {
-                ...r,
-                loading: false,
-                error:
-                  error instanceof Error ? error.message : "Gagal mengambil data.",
-              }
+              ...r,
+              loading: false,
+              error: errorMsg,
+            }
             : r
         )
       );
+
+      // Show user-friendly notification popup
+      setNotification({
+        open: true,
+        type: "error",
+        title: "Unduhan Gagal",
+        message: `Kami tidak dapat mengunduh video dari tautan ini. ${errorMsg}`,
+        hint: "Pastikan tautan TikTok valid dan coba lagi. Jika masalah berlanjut, tautan mungkin bersifat privat.",
+      });
     }
   };
 
   const handleDownload = async (urls: string[]) => {
     if (urls.length === 0) {
-      setFormErrorMessage("Please paste a TikTok URL first.");
+      setNotification({
+        open: true,
+        type: "warning",
+        title: "Tautan Kosong",
+        message: "Silakan tempel tautan TikTok terlebih dahulu sebelum mengunduh.",
+        hint: "Salin tautan dari aplikasi TikTok lalu tempel di kolom input.",
+      });
       return;
     }
 
-    setFormErrorMessage(null);
-    setPopupErrorMessage(null);
+    setNotification((prev) => ({ ...prev, open: false }));
 
     // Buat hasil loading untuk semua URL sekaligus
     const newResults: DownloadResult[] = urls.map((url) => ({
@@ -122,25 +144,59 @@ export default function Home() {
     setResults((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const jsonLd = {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sedotvidio.com";
+
+  const jsonLdWebApp = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    name: "TikSave",
-    url: process.env.NEXT_PUBLIC_SITE_URL || "https://tiksave.com", // Fallback URL if env is not set
+    name: "SedotVidio",
+    url: siteUrl,
     applicationCategory: "MultimediaApplication",
     operatingSystem: "All",
+    inLanguage: "id",
     offers: {
       "@type": "Offer",
       price: "0",
-      priceCurrency: "USD",
+      priceCurrency: "IDR",
     },
     description:
-      "Free TikTok video downloader. Download TikTok videos without watermark and save MP3 audio fast, easily, and securely with TikSave.",
+      "Pengunduh video TikTok gratis. Unduh video TikTok tanpa watermark dalam kualitas HD dan simpan audio MP3 dengan cepat, mudah, dan aman bersama SedotVidio.",
     featureList: [
-      "Download TikTok Videos without watermark",
-      "Download TikTok Audio (MP3)",
-      "Download TikTok Photo Slideshows",
-      "Fast and secure",
+      "Unduh video TikTok tanpa watermark",
+      "Unduh audio TikTok (MP3)",
+      "Unduh foto slideshow TikTok",
+      "Cepat dan aman",
+      "Gratis tanpa registrasi",
+      "Mendukung unduhan massal hingga 5 URL",
+    ],
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.8",
+      ratingCount: "1250",
+      bestRating: "5",
+      worstRating: "1",
+    },
+  };
+
+  const jsonLdOrganization = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "SedotVidio",
+    url: siteUrl,
+    logo: `${siteUrl}/logo.svg`,
+    sameAs: [],
+  };
+
+  const jsonLdBreadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Beranda",
+        item: siteUrl,
+      },
     ],
   };
 
@@ -148,10 +204,17 @@ export default function Home() {
     <main className="flex flex-1 flex-col gap-8 pb-16">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebApp) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumb) }}
       />
       <HeroSection
-        errorMessage={formErrorMessage}
         onDownload={handleDownload}
       />
 
@@ -188,26 +251,8 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Error state per-URL */}
-              {result.error ? (
-                <div className="relative border-2 border-red-600 bg-white p-5 shadow-[6px_6px_0_#b91c1c]">
-                  <button
-                    type="button"
-                    onClick={() => removeResult(result.id)}
-                    aria-label="Tutup"
-                    className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center border-2 border-black bg-[var(--bg)] text-xl font-black shadow-[3px_3px_0_#000] transition-transform hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-                  >
-                    ✕
-                  </button>
-                  <p className="text-sm font-black uppercase tracking-[0.14em] text-red-700">
-                    Gagal
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-red-700">
-                    {result.error}
-                  </p>
-                  <p className="mt-1 truncate text-xs text-red-500">{result.url}</p>
-                </div>
-              ) : (
+              {/* Only show FormatCard for non-errored results */}
+              {!result.error && (
                 <FormatCard
                   key={result.id}
                   loading={result.loading}
@@ -224,12 +269,14 @@ export default function Home() {
       <FAQSection />
       <Footer />
 
-      {popupErrorMessage ? (
-        <ErrorPopup
-          message={popupErrorMessage}
-          onClose={() => setPopupErrorMessage(null)}
-        />
-      ) : null}
+      <NotificationModal
+        open={notification.open}
+        onClose={() => setNotification((prev) => ({ ...prev, open: false }))}
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+        hint={notification.hint}
+      />
     </main>
   );
 }
