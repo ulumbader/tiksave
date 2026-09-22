@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { IconLink, IconHeadphones, IconDownload } from "@/components/icons";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://sedotvidio.vercel.app";
+
 const steps: ReadonlyArray<{
   title: string;
   description: string;
@@ -10,21 +13,21 @@ const steps: ReadonlyArray<{
 }> = [
   {
     title: "Tempel Tautan",
-    description: "Salin tautan TikTok mana saja dan tempel ke kolom input dalam satu ketukan.",
+    description: "Salin tautan video TikTok dari aplikasi TikTok, lalu tempel ke kolom input SedotVidio. Mendukung hingga 5 tautan sekaligus untuk unduhan massal.",
     icon: <IconLink className="h-10 w-10" />,
     cardClass: "bg-white text-[var(--black)]",
     badgeClass: "bg-lime text-[var(--black)]",
   },
   {
     title: "Pilih Format",
-    description: "Pilih video berkualitas tinggi atau ekstrak audio MP3 jernih sebelum mengunduh.",
+    description: "Pilih format unduhan yang diinginkan: video HD tanpa watermark (MP4) atau ekstrak audio MP3 jernih dari video TikTok.",
     icon: <IconHeadphones className="h-10 w-10" />,
     cardClass: "bg-pink text-white",
     badgeClass: "bg-black text-lime",
   },
   {
-    title: "Unduh",
-    description: "Simpan file secara instan dengan alur unduhan yang cepat dan tanpa ribet.",
+    title: "Unduh Gratis",
+    description: "Klik unduh dan file langsung tersimpan ke perangkat Anda. Cepat, gratis, tanpa registrasi, tanpa watermark.",
     icon: <IconDownload className="h-10 w-10" />,
     cardClass: "bg-black text-white",
     badgeClass: "bg-lime text-[var(--black)]",
@@ -37,12 +40,20 @@ const howToJsonLd = {
   "@type": "HowTo",
   name: "Cara Mengunduh Video TikTok Tanpa Watermark dengan SedotVidio",
   description:
-    "Panduan langkah demi langkah untuk mengunduh video TikTok tanpa watermark dan menyimpan audio MP3 menggunakan SedotVidio secara gratis.",
+    "Panduan lengkap langkah demi langkah untuk mengunduh video TikTok tanpa watermark dan menyimpan audio MP3 menggunakan SedotVidio secara gratis. Proses cepat, mudah, dan aman tanpa perlu instal aplikasi.",
   totalTime: "PT1M",
+  image: `${siteUrl}/og-image.png`,
+  url: `${siteUrl}/#how-it-works`,
   tool: [
     {
       "@type": "HowToTool",
-      name: "Browser web (Chrome, Firefox, Safari, dll.)",
+      name: "Browser web (Chrome, Firefox, Safari, Edge, atau browser lainnya)",
+    },
+  ],
+  supply: [
+    {
+      "@type": "HowToSupply",
+      name: "Tautan/link video TikTok yang ingin diunduh",
     },
   ],
   step: steps.map((step, index) => ({
@@ -50,6 +61,7 @@ const howToJsonLd = {
     position: index + 1,
     name: step.title,
     text: step.description,
+    url: `${siteUrl}/#how-it-works`,
   })),
 };
 
@@ -72,6 +84,10 @@ export default function HowItWorks() {
         <h2 className="max-w-3xl font-syne text-4xl font-black leading-tight tracking-[-0.04em] text-[var(--black)] md:text-5xl">
           Cara Unduh Video TikTok dalam 3 Langkah
         </h2>
+
+        <p className="max-w-2xl text-base leading-7 text-[var(--black)]/80">
+          Unduh video TikTok tanpa watermark, simpan audio MP3, dan download foto slideshow dengan mudah menggunakan SedotVidio. Gratis, cepat, dan aman.
+        </p>
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-3">

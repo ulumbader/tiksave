@@ -1,19 +1,35 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://sedotvidio.vercel.app";
 
-  // If baseUrl is not set, we can return an empty sitemap or relative (which might not be strictly valid standard XML, but Next.js usually handles it or it will just wait until baseUrl is provided).
   if (!baseUrl) {
     return [];
   }
 
+  const now = new Date();
+
   return [
     {
       url: baseUrl,
-      lastModified: new Date(),
+      lastModified: now,
       changeFrequency: "daily",
-      priority: 1,
+      priority: 1.0,
+    },
+    {
+      // How-it-works section — valuable content for SEO
+      url: `${baseUrl}/#how-it-works`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      // FAQ section — rich snippet potential
+      url: `${baseUrl}/#faq`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
     },
   ];
 }

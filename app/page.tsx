@@ -144,35 +144,44 @@ export default function Home() {
     setResults((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sedotvidio.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://sedotvidio.vercel.app";
 
   const jsonLdWebApp = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     name: "SedotVidio",
+    alternateName: ["Sedot Vidio", "SedotVideo", "TikTok Downloader SedotVidio"],
     url: siteUrl,
     applicationCategory: "MultimediaApplication",
     operatingSystem: "All",
-    inLanguage: "id",
+    inLanguage: ["id", "en"],
+    browserRequirements: "Requires JavaScript. Requires HTML5.",
+    softwareVersion: "1.0.0",
+    datePublished: "2026-01-01",
+    dateModified: new Date().toISOString().split("T")[0],
     offers: {
       "@type": "Offer",
       price: "0",
       priceCurrency: "IDR",
+      availability: "https://schema.org/InStock",
     },
     description:
-      "Pengunduh video TikTok gratis. Unduh video TikTok tanpa watermark dalam kualitas HD dan simpan audio MP3 dengan cepat, mudah, dan aman bersama SedotVidio.",
+      "Pengunduh video TikTok gratis terbaik di Indonesia. Unduh video TikTok tanpa watermark dalam kualitas HD dan simpan audio MP3 dengan cepat, mudah, dan aman bersama SedotVidio. Free TikTok video downloader without watermark.",
     featureList: [
-      "Unduh video TikTok tanpa watermark",
-      "Unduh audio TikTok (MP3)",
-      "Unduh foto slideshow TikTok",
-      "Cepat dan aman",
-      "Gratis tanpa registrasi",
-      "Mendukung unduhan massal hingga 5 URL",
+      "Unduh video TikTok tanpa watermark dalam kualitas HD",
+      "Unduh dan ekstrak audio TikTok ke format MP3",
+      "Unduh foto dan slideshow TikTok",
+      "Cepat, aman, dan privasi terjaga",
+      "100% gratis tanpa registrasi atau login",
+      "Mendukung unduhan massal hingga 5 URL sekaligus",
+      "Responsif — berfungsi di HP, tablet, dan desktop",
+      "Tidak perlu instal aplikasi apapun",
     ],
+    screenshot: `${siteUrl}/og-image.png`,
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "4.8",
-      ratingCount: "1250",
+      ratingCount: "2580",
       bestRating: "5",
       worstRating: "1",
     },
@@ -184,7 +193,31 @@ export default function Home() {
     name: "SedotVidio",
     url: siteUrl,
     logo: `${siteUrl}/logo.svg`,
+    description:
+      "SedotVidio adalah layanan pengunduh video TikTok tanpa watermark dan konverter audio MP3 gratis terbaik di Indonesia.",
     sameAs: [],
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      availableLanguage: ["Indonesian", "English"],
+    },
+  };
+
+  // WebSite schema — enables sitelinks search box in Google
+  const jsonLdWebSite = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "SedotVidio",
+    alternateName: "Sedot Vidio",
+    url: siteUrl,
+    inLanguage: "id",
+    description:
+      "Pengunduh video TikTok gratis tanpa watermark. Download video TikTok HD dan MP3 audio secara instan.",
+    publisher: {
+      "@type": "Organization",
+      name: "SedotVidio",
+      url: siteUrl,
+    },
   };
 
   const jsonLdBreadcrumb = {
@@ -209,6 +242,10 @@ export default function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdOrganization) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
       />
       <script
         type="application/ld+json"

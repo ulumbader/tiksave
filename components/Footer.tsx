@@ -12,7 +12,7 @@ export default function Footer() {
             SedotVidio
           </a>
           <p className="mt-3 text-sm leading-7 text-white/80">
-            Unduh video TikTok tanpa watermark dan simpan audio MP3, gratis dan cepat.
+            Unduh video TikTok tanpa watermark dan simpan audio MP3, gratis dan cepat. Pengunduh TikTok terbaik di Indonesia.
           </p>
         </div>
 
@@ -29,8 +29,8 @@ export default function Footer() {
           <a href="#faq" className="transition-colors hover:text-lime">
             FAQ
           </a>
-          <a href="#privacy-policy" className="transition-colors hover:text-lime">
-            Kebijakan Privasi
+          <a href="/sitemap.xml" className="transition-colors hover:text-lime">
+            Sitemap
           </a>
         </nav>
 

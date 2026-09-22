@@ -19,8 +19,10 @@ const nextConfig: NextConfig = {
             value: "same-origin",
           },
           {
+            // Using credentialless instead of require-corp to avoid blocking
+            // external embeds that crawlers might follow
             key: "Cross-Origin-Embedder-Policy",
-            value: "require-corp",
+            value: "credentialless",
           },
           {
             key: "X-Content-Type-Options",
@@ -33,6 +35,15 @@ const nextConfig: NextConfig = {
           {
             key: "X-Frame-Options",
             value: "SAMEORIGIN",
+          },
+          {
+            // Explicitly tell crawlers: index everything
+            key: "X-Robots-Tag",
+            value: "all, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
           },
         ],
       },
